@@ -1,15 +1,15 @@
 import {
   collection,
-  deleteDoc,
   doc,
   getDocs,
   limit,
   orderBy,
   query,
   setDoc,
+  where,
   writeBatch,
 } from "@firebase/firestore";
-import { Button, Grid, Link, TextField, Typography } from "@mui/material";
+import { Button, Grid, Link, Typography } from "@mui/material";
 import { Container } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
@@ -24,11 +24,10 @@ import {
 const Home = () => {
   const [initialized, setInitialized] = useState(undefined);
   const [video, setVideo] = useState({});
-  const [sessionId, setSessionId] = useState("");
 
   useEffect(() => {
     async function checkInitialized() {
-      const querySnapshot = await getDocs(collection(db, "initialized"));
+      const querySnapshot = await getDocs(collection(db, "videos"));
       if (querySnapshot.empty) {
         setInitialized(false);
       } else {
@@ -36,10 +35,6 @@ const Home = () => {
       }
     }
     checkInitialized();
-    const localKey = localStorage.getItem("sessionId");
-    if (localKey) {
-      setSessionId(localKey);
-    }
   }, []);
 
   useEffect(() => {
@@ -49,9 +44,9 @@ const Home = () => {
   }, [initialized]);
 
   async function getVideo() {
-    // query for video where watched array does not contain key, then order by publishedAt desc and limit to 1
     const q = query(
       collection(db, "videos"),
+      where(`seen`, "==", false),
       orderBy("position", "desc"),
       limit(1)
     );
@@ -64,6 +59,7 @@ const Home = () => {
   const initializeDatabase = async () => {
     try {
       // batch add documents to videos collection 100 at a time until all links are added
+      setInitialized(undefined);
       let batchCount = 0;
       let batch = writeBatch(db);
       for (const link of links) {
@@ -78,10 +74,6 @@ const Home = () => {
         }
       }
       await batch.commit();
-      // add initialized document to initialized collection
-      await setDoc(doc(db, "initialized", "initialized"), {
-        date: new Date(),
-      });
       setInitialized(true);
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -90,33 +82,52 @@ const Home = () => {
 
   if (initialized === undefined) {
     return (
-      <Container>
-        <h1>Welcome to Ahmed Subhy Mansour videos</h1>
-        <div>Loading ....</div>
+      <Container
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          width: "100%",
+        }}
+      >
+        <Typography variant="body1" align="center">
+          Initializing....
+        </Typography>
       </Container>
     );
   }
 
   if (initialized === false) {
     return (
-      <Container>
-        <h1>Welcome to Ahmed Subhy Mansour videos</h1>
-        <Button variant="contained" onClick={() => initializeDatabase()}>
-          Initialize
+      <Container style={{ height: "100vh" }}>
+        <Typography align="center" style={{ margin: "2rem" }}>
+          Welcome to Ahmed Subhy Mansour videos
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => initializeDatabase()}
+          style={{
+            height: "250px",
+            width: "100%",
+            margin: "0 auto",
+            marginTop: "100px",
+            borderRadius: "32px",
+          }}
+        >
+          {`Initialize Database with ${links.length} videos`}
         </Button>
       </Container>
     );
   }
 
   const playVideo = async (url, videoId) => {
-    await deleteDoc(doc(db, "videos", videoId));
+    await setDoc(doc(db, "videos", videoId), {
+      ...video,
+      seen: true,
+    });
     await getVideo();
     window.open(url, "_blank");
-  };
-
-  const handleSessionChange = (e) => {
-    setSessionId(e.target.value);
-    localStorage.setItem("sessionId", e.target.value);
   };
 
   // make random number from 0 to 360
@@ -124,7 +135,7 @@ const Home = () => {
 
   return (
     <MainContainer>
-      <Typography variant="h2">
+      <Typography variant="h3">
         Welcome to Ahmed Subhy Mansour videos
       </Typography>
       <Typography
@@ -134,14 +145,6 @@ const Home = () => {
       >
         Recommended next video to watch
       </Typography>
-      <TextField
-        variant="outlined"
-        label="session id"
-        style={{ marginBottom: "100px" }}
-        value={sessionId}
-        onChange={handleSessionChange}
-      />
-
       <Grid container spacing={2}>
         <Grid item xs={3}>
           <PositionContainer random={random}>

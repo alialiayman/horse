@@ -19,11 +19,13 @@ export const PlayContainer = styled.div`
   height: 100%;
 `;
 
-export const PositionContainer = styled.h2`
+export const PositionContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   border: 1px solid #000;
+  font-size: 2rem;
+  font-weight: 700;
   width: 100px;
   height: 100px;
   margin: 0 auto;
