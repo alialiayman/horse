@@ -14,6 +14,7 @@ import { Container } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import links from "../../links.json";
+import dayjs from "dayjs";
 import {
   BodyContainer,
   MainContainer,
@@ -158,7 +159,9 @@ const Home = () => {
               <Typography variant="h5">{video.url}</Typography>
             </Link>
             <Typography variant="body1">{video.description}</Typography>
-            <Typography variant="caption">{video.date}</Typography>
+            <Typography variant="caption">{`${dayjs(video.date).format(
+              "ddd DD-MMM-YYYY"
+            )}`}</Typography>
           </BodyContainer>
         </Grid>
         <Grid item xs={3}>
@@ -174,6 +177,13 @@ const Home = () => {
           </PlayContainer>
         </Grid>
       </Grid>
+      <div>
+        <img
+          src={video.thumbnail}
+          alt={video.title}
+          style={{ width: "100%" }}
+        />
+      </div>
     </MainContainer>
   );
 };
