@@ -25,14 +25,20 @@ import {
 const Home = () => {
   const [initialized, setInitialized] = useState(undefined);
   const [video, setVideo] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function checkInitialized() {
-      const querySnapshot = await getDocs(collection(db, "videos"));
-      if (querySnapshot.empty) {
-        setInitialized(false);
-      } else {
-        setInitialized(true);
+      try {
+        const querySnapshot = await getDocs(collection(db, "videos"));
+        if (querySnapshot.empty) {
+          setInitialized(false);
+        } else {
+          setInitialized(true);
+        }
+      } catch (e) {
+        console.error("Error adding document: ", e);
+        setErrorMessage(e.message);
       }
     }
     checkInitialized();
@@ -92,8 +98,8 @@ const Home = () => {
           width: "100%",
         }}
       >
-        <Typography variant="body1" align="center">
-          Initializing....
+        <Typography variant="h4" align="center">
+          {errorMessage ? errorMessage : 'Initializing....'}
         </Typography>
       </Container>
     );
