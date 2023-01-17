@@ -21,8 +21,7 @@ import {
   PlayContainer,
   PositionContainer,
 } from "./style";
-import  VideoPlayer  from 'react-video-js-player';
-import YouTube from 'react-youtube';
+import YouTube from "react-youtube";
 
 const Home = () => {
   const [initialized, setInitialized] = useState(undefined);
@@ -100,7 +99,7 @@ const Home = () => {
         }}
       >
         <Typography variant="h4" align="center">
-          {errorMessage ? errorMessage : 'Initializing....'}
+          {errorMessage ? errorMessage : "Initializing...."}
         </Typography>
       </Container>
     );
@@ -191,9 +190,13 @@ const Home = () => {
           style={{ width: "100%" }}
         />
       </div>
-      {video.url && 
-      <YouTube videoId={video.videoId} opts={{width: '100%', height: '100%'}}/>
-      }
+      {video.url && (
+        <YouTube
+          videoId={video.videoId}
+          opts={{ width: "100%", height: "100%", playerVars: { autoplay: 1 } }}
+          onEnd={() => console.log("end")}
+        />
+      )}
     </MainContainer>
   );
 };
