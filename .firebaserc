@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "horse-elephant"
-  }
+  },
+  "targets": {
+    "ahmed-subhy": {
+      "hosting": {
+        "horse": [
+          "horse-elephant2"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

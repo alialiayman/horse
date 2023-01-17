@@ -9,7 +9,7 @@ import {
   where,
   writeBatch,
 } from "@firebase/firestore";
-import { Button, Grid, Link, Typography } from "@mui/material";
+import { Button, Grid, Link, Typography, useMediaQuery } from "@mui/material";
 import { Container } from "@mui/system";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
@@ -27,11 +27,13 @@ const Home = () => {
   const [initialized, setInitialized] = useState(undefined);
   const [video, setVideo] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const isSmall = useMediaQuery("(max-width:600px)");
 
   useEffect(() => {
     async function checkInitialized() {
       try {
-        const querySnapshot = await getDocs(collection(db, "videos"));
+        const q = query(collection(db, "videos"), limit(1));
+        const querySnapshot = await getDocs(q);
         if (querySnapshot.empty) {
           setInitialized(false);
         } else {
@@ -142,54 +144,66 @@ const Home = () => {
 
   return (
     <MainContainer>
-      <Typography variant="h3">
-        Welcome to Ahmed Subhy Mansour videos
-      </Typography>
-      <Typography
-        style={{ marginBottom: "10px" }}
-        variant="subtitle1"
-        color="textSecondary"
-      >
-        Recommended next video to watch
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={3}>
-          <PositionContainer random={random}>
-            <Typography variant="h2">{video.position}</Typography>
-          </PositionContainer>
-        </Grid>
-        <Grid item xs={6}>
-          <BodyContainer>
-            <Typography variant="h4">{video.title}</Typography>
-            <Link href={video.url}>
-              <Typography variant="h5">{video.url}</Typography>
-            </Link>
-            <Typography variant="body1">{video.description}</Typography>
-            <Typography variant="caption">{`${dayjs(video.date).format(
-              "ddd DD-MMM-YYYY"
-            )}`}</Typography>
-          </BodyContainer>
-        </Grid>
-        <Grid item xs={3}>
-          <PlayContainer>
-            <Button
-              variant="contained"
-              onClick={() => nextVideo(video.url, video.videoId)}
-              size="large"
-            >
-              {`Next Video`}
-            </Button>
-            <Typography variant="caption">{video.since}</Typography>
-          </PlayContainer>
-        </Grid>
-      </Grid>
-      <div>
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          style={{ width: "100%" }}
-        />
-      </div>
+      {!isSmall && (
+        <>
+          <Typography variant="h3">
+            Welcome to Ahmed Subhy Mansour videos
+          </Typography>
+          <Typography
+            style={{ marginBottom: "10px" }}
+            variant="subtitle1"
+            color="textSecondary"
+          >
+            Recommended next video to watch
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={3}>
+              <PositionContainer random={random}>
+                <Typography variant="h2">{video.position}</Typography>
+              </PositionContainer>
+            </Grid>
+            <Grid item xs={6}>
+              <BodyContainer>
+                <Typography variant="h4">{video.title}</Typography>
+                <Link href={video.url}>
+                  <Typography variant="h5">{video.url}</Typography>
+                </Link>
+                <Typography variant="body1">{video.description}</Typography>
+                <Typography variant="caption">{`${dayjs(video.date).format(
+                  "ddd DD-MMM-YYYY"
+                )}`}</Typography>
+              </BodyContainer>
+            </Grid>
+            <Grid item xs={3}>
+              <PlayContainer>
+                <Button
+                  variant="contained"
+                  onClick={() => nextVideo(video.url, video.videoId)}
+                  size="large"
+                >
+                  {`Next Video`}
+                </Button>
+                <Typography variant="caption">{video.since}</Typography>
+              </PlayContainer>
+            </Grid>
+          </Grid>
+        </>
+      )}
+      {isSmall && (
+        <div style={{ marginBottom: "64px", display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <Button
+            variant="contained"
+            onClick={() => nextVideo(video.url, video.videoId)}
+            size="large"
+          >
+            {`Next Video`}
+          </Button>
+          <div>
+            <Typography align="center" variant="h5">{video.title}</Typography>
+          </div>
+        </div>
+      )}
+
       {video.url && (
         <YouTube
           videoId={video.videoId}
