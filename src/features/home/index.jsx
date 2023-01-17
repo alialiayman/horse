@@ -21,6 +21,8 @@ import {
   PlayContainer,
   PositionContainer,
 } from "./style";
+import  VideoPlayer  from 'react-video-js-player';
+import YouTube from 'react-youtube';
 
 const Home = () => {
   const [initialized, setInitialized] = useState(undefined);
@@ -37,7 +39,6 @@ const Home = () => {
           setInitialized(true);
         }
       } catch (e) {
-        console.error("Error adding document: ", e);
         setErrorMessage(e.message);
       }
     }
@@ -128,13 +129,13 @@ const Home = () => {
     );
   }
 
-  const playVideo = async (url, videoId) => {
+  const nextVideo = async (url, videoId) => {
     await setDoc(doc(db, "videos", videoId), {
       ...video,
       seen: true,
     });
     await getVideo();
-    window.open(url, "_blank");
+    // window.open(url, "_blank");
   };
 
   // make random number from 0 to 360
@@ -174,10 +175,10 @@ const Home = () => {
           <PlayContainer>
             <Button
               variant="contained"
-              onClick={() => playVideo(video.url, video.videoId)}
+              onClick={() => nextVideo(video.url, video.videoId)}
               size="large"
             >
-              {`Play ${video.duration}`}
+              {`Next Video`}
             </Button>
             <Typography variant="caption">{video.since}</Typography>
           </PlayContainer>
@@ -190,6 +191,9 @@ const Home = () => {
           style={{ width: "100%" }}
         />
       </div>
+      {video.url && 
+      <YouTube videoId={video.videoId} opts={{width: '100%', height: '100%'}}/>
+      }
     </MainContainer>
   );
 };
